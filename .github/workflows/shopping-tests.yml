@@ -11,9 +11,6 @@ on:
     paths: 
       - 'tests/shopping*.spec.ts'
       - 'shopping_trip_redirection.xlsx'
-  schedule:
-    # Run shopping tests twice daily at 9 AM and 6 PM UTC
-    - cron: '0 9,18 * * *'
   workflow_dispatch:
     inputs:
       test_file:
