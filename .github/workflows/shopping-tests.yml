@@ -1,0 +1,79 @@
+name: Shopping Trip Tests
+
+on:
+  push:
+    branches: [ main, master ]
+    paths: 
+      - 'tests/shopping*.spec.ts'
+      - 'shopping_trip_redirection.xlsx'
+  pull_request:
+    branches: [ main, master ]
+    paths: 
+      - 'tests/shopping*.spec.ts'
+      - 'shopping_trip_redirection.xlsx'
+  schedule:
+    # Run shopping tests twice daily at 9 AM and 6 PM UTC
+    - cron: '0 9,18 * * *'
+  workflow_dispatch:
+    inputs:
+      test_file:
+        description: 'Which test file to run'
+        required: false
+        default: 'tests/shopping.spec.ts'
+        type: choice
+        options:
+        - 'tests/shopping.spec.ts'
+        - 'tests/shopping_trip_redirection.spec.ts'
+
+jobs:
+  shopping-tests:
+    timeout-minutes: 90
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium]
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+      
+    - name: Run Shopping Tests
+      run: npx playwright test ${{ github.event.inputs.test_file || 'tests/shopping.spec.ts' }} --project=chromium --reporter=html
+      env:
+        # Add any environment variables your tests might need
+        HEADLESS: true
+        
+    - name: Upload Playwright Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-${{ matrix.project }}
+        path: playwright-report/
+        retention-days: 30
+        
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.project }}
+        path: test-results/
+        retention-days: 30
+        
+    - name: Upload Screenshots
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: screenshots-${{ matrix.project }}
+        path: test-results/**/*.png
+        retention-days: 30

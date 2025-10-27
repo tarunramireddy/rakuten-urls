@@ -5,7 +5,13 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
-    "test:list": "playwright test --list"
+    "test:list": "playwright test --list",
+    "test:shopping": "playwright test tests/shopping.spec.ts",
+    "test:redirection": "playwright test tests/shopping_trip_redirection.spec.ts",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "install:browsers": "playwright install"
   },
   "keywords": [],
   "author": "",
