@@ -3,14 +3,8 @@ name: Shopping Trip Tests
 on:
   push:
     branches: [ main, master ]
-    paths: 
-      - 'tests/shopping*.spec.ts'
-      - 'shopping_trip_redirection.xlsx'
   pull_request:
     branches: [ main, master ]
-    paths: 
-      - 'tests/shopping*.spec.ts'
-      - 'shopping_trip_redirection.xlsx'
   workflow_dispatch:
     inputs:
       test_file:
