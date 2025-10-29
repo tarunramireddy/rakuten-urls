@@ -18,7 +18,7 @@ on:
 
 jobs:
   shopping-tests:
-    timeout-minutes: 90
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -36,6 +36,16 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      id: playwright-cache
+      with:
+        path: |
+          ~/.cache/ms-playwright
+        key: playwright-browsers-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}-v2
+        restore-keys: |
+          playwright-browsers-${{ runner.os }}-
+        
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps chromium
       
@@ -44,16 +54,14 @@ jobs:
         # Add Google DNS for better resolution
         echo "nameserver 8.8.8.8" | sudo tee -a /etc/resolv.conf
         echo "nameserver 8.8.4.4" | sudo tee -a /etc/resolv.conf
-        # Test connectivity
-        ping -c 2 www.rakuten.com || echo "Ping failed but continuing..."
+        # Quick connectivity test
+        curl -I --max-time 5 https://www.rakuten.com || echo "Connectivity test failed but continuing..."
         
     - name: Run Shopping Tests
       run: npx playwright test ${{ github.event.inputs.test_file || 'tests/shopping.spec.ts' }} --project=chromium --reporter=html --timeout=120000
       env:
         # Add any environment variables your tests might need
         HEADLESS: true
-        # Network settings for CI
-        PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
         
     - name: Upload Playwright Report
       uses: actions/upload-artifact@v4
