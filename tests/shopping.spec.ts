@@ -75,13 +75,14 @@ async function attemptRakutenSignIn(page: Page) {
     const signInFrame = page.frameLocator('#appshell-auth-modal-iframe');
     await signInFrame.locator('#emailAddress').fill("zmzh5lra0a@zudpck.com");
     await signInFrame.locator('#password').fill("Reddy!2k25");
+    await page.waitForTimeout(2000);
 
     // reCAPTCHA
     console.log('Checking for reCAPTCHA...');
     const recaptchaFrame = signInFrame.frameLocator('iframe[title="reCAPTCHA"]');
     const recaptchaCheckbox = recaptchaFrame.locator('[role="checkbox"]');
 
-    if (await recaptchaCheckbox.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await recaptchaCheckbox.isVisible({ timeout: 5000 }).catch(() => false)) {
       await page.waitForTimeout(7000);
       console.log('reCAPTCHA detected — clicking...');
       await recaptchaCheckbox.click({ delay: 200 });
@@ -100,6 +101,8 @@ async function attemptRakutenSignIn(page: Page) {
 
 // MAIN TEST
 test.describe('Shopping Trip Redirection Tests', () => {
+  // Extend timeout for all tests and hooks in this file
+  test.setTimeout(120000);
   test.describe.configure({ mode: 'serial' });
 
   const excelFilePath = path.resolve(process.cwd(), 'shopping_trip_redirection.xlsx');
