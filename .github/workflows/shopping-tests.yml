@@ -45,11 +45,21 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps chromium
       
+    - name: Setup DNS and Network
+      run: |
+        # Add Google DNS for better resolution
+        echo "nameserver 8.8.8.8" | sudo tee -a /etc/resolv.conf
+        echo "nameserver 8.8.4.4" | sudo tee -a /etc/resolv.conf
+        # Test connectivity
+        ping -c 2 www.rakuten.com || echo "Ping failed but continuing..."
+        
     - name: Run Shopping Tests
-      run: npx playwright test ${{ github.event.inputs.test_file || 'tests/shopping.spec.ts' }} --project=chromium --reporter=html
+      run: npx playwright test ${{ github.event.inputs.test_file || 'tests/shopping.spec.ts' }} --project=chromium --reporter=html --timeout=120000
       env:
         # Add any environment variables your tests might need
         HEADLESS: true
+        # Network settings for CI
+        PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
         
     - name: Upload Playwright Report
       uses: actions/upload-artifact@v4
